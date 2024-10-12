@@ -1,0 +1,21 @@
+name: Go Build Action
+
+on:
+  workflow_dispatch: # Trigger workflow manually
+
+env:
+  SSL_CERT_BASE64: ${{ secrets.SSL_CERT_BASE64 }}
+
+jobs:
+  dump-and-restore:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Decode SSL Cert
+        run: |
+          echo "${{ secrets.SSL_CERT_BASE64 }}" | base64 --decode > my-ssl-cert.pem
+
+      - name: Just echo
+        run: |
+          echo '123'
+          echo '456'

@@ -1,12 +1,11 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
 	"go-auth/controllers"
 	"go-auth/initializers"
 	"go-auth/middlewares"
 	"os"
-
-	"github.com/gin-gonic/gin"
 )
 
 func init() {
