@@ -1,5 +1,10 @@
 name: Remote Build using SSH
 on: [push]
+env:
+  HOST: ${{ secrets.HOST }}
+  PORT: ${{ secrets.PORT }}
+  USERNAME: ${{ secrets.USERNAME }}
+  SSL_CERT_BASE64: ${{ secrets.SSL_CERT_BASE64 }}
 jobs:
 
   build:
