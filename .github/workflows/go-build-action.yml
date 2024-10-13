@@ -6,7 +6,6 @@ env:
   USERNAME: ${{ secrets.USERNAME }}
   SSL_CERT_BASE64: ${{ secrets.SSL_CERT_BASE64 }}
 jobs:
-
   build:
     name: Build
     runs-on: ubuntu-latest
