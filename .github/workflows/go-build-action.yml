@@ -24,4 +24,4 @@ jobs:
             /usr/local/go/bin/go generate ./...
             /usr/local/go/bin/go build
             /usr/local/go/bin/go run migrate/migrate.go
-            sudo systemctl restart ${{ env.DIR }}
+            sudo systemctl daemon-reload ${{ env.DIR }}
