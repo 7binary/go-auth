@@ -1,21 +1,23 @@
-name: Go Build Action
-
-on:
-  workflow_dispatch: # Trigger workflow manually
-
-env:
-  SSL_CERT_BASE64: ${{ secrets.SSL_CERT_BASE64 }}
-
+name: Remote Build using SSH
+on: [push]
 jobs:
-  dump-and-restore:
-    runs-on: ubuntu-latest
 
+  build:
+    name: Build
+    runs-on: ubuntu-latest
     steps:
       - name: Decode SSL Cert
         run: |
           echo "${{ secrets.SSL_CERT_BASE64 }}" | base64 --decode > my-ssl-cert.pem
 
-      - name: Just echo
-        run: |
-          echo '123'
-          echo '456'
+      - name: Run remote build
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.HOST }}
+          port: ${{ secrets.PORT }}
+          username: ${{ secrets.USERNAME }}
+          key: my-ssl-cert.pem
+          script: |
+            whoami
+            host -V
+            ls -la
