@@ -1,5 +1,6 @@
 name: Remote prepare project dir
-on: [ push ]
+on:
+  workflow_dispatch: # Trigger workflow manually
 env:
   PROJECT: ${{ github.event.repository.name }}
 jobs:
