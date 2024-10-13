@@ -3,13 +3,15 @@ on:
   workflow_dispatch: # Trigger workflow manually
 env:
   PROJECT: ${{ github.event.repository.name }}
+  ACTIONS_RUNNER_DEBUG: true
+  ACTIONS_STEP_DEBUG: true
 jobs:
   build:
-    name: Build
+    name: Prepare
     runs-on: ubuntu-latest
     steps:
 
-      - name: Run remote build
+      - name: Prepare project folder
         uses: appleboy/ssh-action@v1.1.0
         with:
           host: ${{ secrets.HOST }}
@@ -18,8 +20,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script_stop: true
           script: |
-            mkdir -p /home/${{ secrets.USERNAME }}/${{ env.PROJECT }}
-            mkdir -p /home/${{ secrets.USERNAME }}/${{ env.PROJECT }}/build
-            touch /home/${{ secrets.USERNAME }}/${{ env.PROJECT }}/.env
-            cd /home/${{ secrets.USERNAME }}/${{ env.PROJECT }}/build
-            git clone https://github.com/7binary//${{ env.PROJECT }}.git .
+            mkdir -p ${{ env.PROJECT }}
+            mkdir -p ${{ env.PROJECT }}/build
+            [ ! -f ${{ env.PROJECT }}/.env ] && touch ${{ env.PROJECT }}/.env
+            cd ${{ env.PROJECT }}/build
+            git clone https://github.com/7binary/${{ env.PROJECT }}.git .

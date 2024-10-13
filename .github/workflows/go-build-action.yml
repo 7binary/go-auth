@@ -2,6 +2,8 @@ name: Remote build using SSH
 on: [ push ]
 env:
   PROJECT: ${{ github.event.repository.name }}
+  ACTIONS_RUNNER_DEBUG: true
+  ACTIONS_STEP_DEBUG: true
 jobs:
   build:
     name: Build
