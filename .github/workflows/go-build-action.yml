@@ -15,6 +15,7 @@ jobs:
           port: ${{ secrets.PORT }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
+          script_stop: true
           script: |
             cp /home/${{ secrets.USERNAME }}/${{ env.DIR }}/.env /home/${{ secrets.USERNAME }}/${{ env.DIR }}/build/.env 
             cd ${{ env.DIR }}/build
