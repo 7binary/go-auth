@@ -1,22 +1,10 @@
 name: Remote Build using SSH
 on: [ push ]
-env:
-  HOST: ${{ secrets.HOST }}
-  PORT: ${{ secrets.PORT }}
-  USERNAME: ${{ secrets.USERNAME }}
-  SSL_CERT_BASE64: ${{ secrets.SSL_CERT_BASE64 }}
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Decode SSL Cert
-        run: |
-          echo "${{ secrets.SSL_CERT_BASE64 }}" | base64 --decode > my-ssl-cert.pem
-          ls -la
-
-      - name: List
-        run: ls -la
 
       - name: Run remote build
         uses: appleboy/ssh-action@v1.1.0
@@ -24,7 +12,7 @@ jobs:
           host: ${{ secrets.HOST }}
           port: ${{ secrets.PORT }}
           username: ${{ secrets.USERNAME }}
-          key: my-ssl-cert.pem
+          key: ${{ secrets.SSH_KEY }}
           script: |
             whoami
             host -V
