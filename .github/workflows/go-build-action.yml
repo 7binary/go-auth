@@ -16,9 +16,8 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            host -V
-            ls -la
-            cd ${{ env.DIR }}
+            cp /home/${{ secrets.USERNAME }}/${{ env.DIR }}/.env /home/${{ secrets.USERNAME }}/${{ env.DIR }}/build/.env 
+            cd ${{ env.DIR }}/build
             git pull
             /usr/local/go/bin/go mod tidy
             /usr/local/go/bin/go generate ./...
