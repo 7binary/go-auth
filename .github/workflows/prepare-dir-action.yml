@@ -3,8 +3,7 @@ on:
   workflow_dispatch: # Trigger workflow manually
 env:
   PROJECT: ${{ github.event.repository.name }}
-  ACTIONS_RUNNER_DEBUG: true
-  ACTIONS_STEP_DEBUG: true
+  DIR: /home/${{ secrets.USERNAME }}/${{ github.event.repository.name }}
 jobs:
   build:
     name: Prepare
@@ -20,8 +19,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script_stop: true
           script: |
-            mkdir -p ${{ env.PROJECT }}
-            mkdir -p ${{ env.PROJECT }}/build
-            [ ! -f ${{ env.PROJECT }}/.env ] && touch ${{ env.PROJECT }}/.env
-            cd ${{ env.PROJECT }}/build
+            mkdir -p ${{ env.DIR }}
+            mkdir -p ${{ env.DIR }}/build
+            [ ! -f ${{ env.DIR }}/.env ] && touch ${{ env.DIR }}/.env
+            cd ${{ env.DIR }}/build
             git clone https://github.com/7binary/${{ env.PROJECT }}.git .

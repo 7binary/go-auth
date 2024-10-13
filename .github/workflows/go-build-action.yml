@@ -2,8 +2,7 @@ name: Remote build using SSH
 on: [ push ]
 env:
   PROJECT: ${{ github.event.repository.name }}
-  ACTIONS_RUNNER_DEBUG: true
-  ACTIONS_STEP_DEBUG: true
+  DIR: /home/${{ secrets.USERNAME }}/${{ github.event.repository.name }}
 jobs:
   build:
     name: Build
@@ -19,8 +18,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script_stop: true
           script: |
-            cp ${{ env.PROJECT }}/.env ${{ env.PROJECT }}/build/.env 
-            cd ${{ env.PROJECT }}/build
+            ln -sf ${{ env.DIR }}/.env ${{ env.DIR }}/build/.env 
+            cd ${{ env.DIR }}/build
             git pull
             /usr/local/go/bin/go mod tidy
             /usr/local/go/bin/go generate ./...
