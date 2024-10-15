@@ -11,9 +11,19 @@ import (
 	"time"
 )
 
+func GenerateToken(user *models.User) (string, error) {
+	generateToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":  user.ID,
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
+	})
+
+	token, err := generateToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
+
+	return token, err
+}
+
 func CreateUser(c *gin.Context) {
 	var authInput models.AuthInput
-
 	if err := c.ShouldBindJSON(&authInput); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -21,14 +31,12 @@ func CreateUser(c *gin.Context) {
 
 	var userFound models.User
 	initializers.DB.Where("username=?", authInput.Username).Find(&userFound)
-
 	if userFound.ID != 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "username already used"})
 		return
 	}
 
 	passwordHash, err := argon2id.CreateHash(authInput.Password, argon2id.DefaultParams)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -38,16 +46,9 @@ func CreateUser(c *gin.Context) {
 		Username: authInput.Username,
 		Password: string(passwordHash),
 	}
-
 	initializers.DB.Create(&user)
 
-	generateToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":  user.ID,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
-	})
-
-	token, err := generateToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
-
+	token, err := GenerateToken(&user)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to generate token"})
 		return
@@ -60,9 +61,7 @@ func CreateUser(c *gin.Context) {
 }
 
 func Login(c *gin.Context) {
-
 	var authInput models.AuthInput
-
 	if err := c.ShouldBindJSON(&authInput); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -70,7 +69,6 @@ func Login(c *gin.Context) {
 
 	var userFound models.User
 	initializers.DB.Where("username=?", authInput.Username).Find(&userFound)
-
 	if userFound.ID == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "user not found"})
 		return
@@ -86,13 +84,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	generateToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":  userFound.ID,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
-	})
-
-	token, err := generateToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
-
+	token, err := GenerateToken(&userFound)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to generate token"})
 		return
