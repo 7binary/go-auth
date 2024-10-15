@@ -1,18 +1,17 @@
 package controllers
 
 import (
+	"github.com/alexedwards/argon2id"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"go-auth/initializers"
 	"go-auth/models"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"os"
 	"time"
 )
 
 func CreateUser(c *gin.Context) {
-
 	var authInput models.AuthInput
 
 	if err := c.ShouldBindJSON(&authInput); err != nil {
@@ -28,7 +27,8 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte(authInput.Password), bcrypt.DefaultCost)
+	passwordHash, err := argon2id.CreateHash(authInput.Password, argon2id.DefaultParams)
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -41,8 +41,22 @@ func CreateUser(c *gin.Context) {
 
 	initializers.DB.Create(&user)
 
-	c.JSON(http.StatusOK, gin.H{"data": user})
+	generateToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":  user.ID,
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
+	})
 
+	token, err := generateToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to generate token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"token": token,
+		"user":  user,
+	})
 }
 
 func Login(c *gin.Context) {
@@ -62,7 +76,12 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(userFound.Password), []byte(authInput.Password)); err != nil {
+	passwordMatch, err := argon2id.ComparePasswordAndHash(authInput.Password, userFound.Password)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if passwordMatch == false {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid password"})
 		return
 	}
@@ -76,6 +95,7 @@ func Login(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to generate token"})
+		return
 	}
 
 	c.JSON(200, gin.H{
