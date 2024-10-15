@@ -15,9 +15,7 @@ import (
 )
 
 func CheckAuth(c *gin.Context) {
-
 	authHeader := c.GetHeader("Authorization")
-
 	if authHeader == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is missing"})
 		c.AbortWithStatus(http.StatusUnauthorized)
@@ -38,7 +36,6 @@ func CheckAuth(c *gin.Context) {
 		}
 		return []byte(os.Getenv("JWT_SECRET")), nil
 	})
-
 	if err != nil || !token.Valid {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
 		c.AbortWithStatus(http.StatusUnauthorized)
@@ -51,7 +48,6 @@ func CheckAuth(c *gin.Context) {
 		c.Abort()
 		return
 	}
-
 	if float64(time.Now().Unix()) > claims["exp"].(float64) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "token expired"})
 		c.AbortWithStatus(http.StatusUnauthorized)
@@ -60,13 +56,11 @@ func CheckAuth(c *gin.Context) {
 
 	var user models.User
 	initializers.DB.Where("ID=?", claims["id"]).Find(&user)
-
 	if user.ID == 0 {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
 	c.Set("currentUser", user)
-
 	c.Next()
 }
