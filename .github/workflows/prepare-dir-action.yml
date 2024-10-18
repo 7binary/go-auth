@@ -2,6 +2,7 @@ name: Remote prepare project dir
 on:
   workflow_dispatch: # Trigger workflow manually
 env:
+  OWNER: ${{ github.repository_owner }}
   PROJECT: ${{ github.event.repository.name }}
   DIR: /home/${{ secrets.USERNAME }}/${{ github.event.repository.name }}
 jobs:
@@ -22,5 +23,7 @@ jobs:
             mkdir -p ${{ env.DIR }}
             mkdir -p ${{ env.DIR }}/build
             [ ! -f ${{ env.DIR }}/.env ] && touch ${{ env.DIR }}/.env
+            ln -sf ${{ env.DIR }}/.env ${{ env.DIR }}/build/.env
             cd ${{ env.DIR }}/build
-            git clone https://github.com/7binary/${{ env.PROJECT }}.git .
+            [ ! -f ${{ env.DIR }}/build/main.go ] && git clone https://github.com/${{env.OWNER}}/${{ env.PROJECT }}.git .
+            [ -f ${{ env.DIR }}/build/main.go ] && git pull
